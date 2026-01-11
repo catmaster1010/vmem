@@ -1,5 +1,6 @@
 #include "vmem.h"
 
+vmem_t *heap_arena; /* Primordial kernel vmem arena*/
 vmem_t *vmem_create(const char *name, void *base, size_t size, size_t quantum,
                     void *(*afunc)(vmem_t *, size_t, int),
                     void (*ffunc)(vmem_t *, void *, size_t), vmem_t *source,
@@ -19,3 +20,7 @@ void *vmem_xalloc(vmem_t *vmp, size_t size, size_t align, size_t phase,
 void vmem_xfree(vmem_t *vmp, void *addr, size_t size);
 
 void *vmem_add(vmem_t *vmp, void *addr, size_t size, int vmflag);
+
+void vmem_init(void *base, size_t size) {
+  vmem_create("heap", base, size, PAGE_SIZE, NULL, NULL, NULL, 0, VM_SLEEP);
+}

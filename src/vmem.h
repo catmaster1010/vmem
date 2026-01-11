@@ -3,7 +3,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define VM_SLEEP 0x10
+#define VM_NOSLEEP 0x01
+
 typedef struct vmem vmem_t;
+
 struct vmem {
   char vm_name[VMEM_NAMELEN]; /* arena name */
   vmem_lock_t vm_lock;        /* arena lock, defined in vmem_common.h */
@@ -39,4 +43,7 @@ void *vmem_xalloc(vmem_t *vmp, size_t size, size_t align, size_t phase,
 void vmem_xfree(vmem_t *vmp, void *addr, size_t size);
 
 void *vmem_add(vmem_t *vmp, void *addr, size_t size, int vmflag);
+
+void vmem_init(void *base, size_t size); // Base and size of the kernal heap
+
 #endif // !_VMEM_H
