@@ -7,17 +7,25 @@
 #define VM_NOSLEEP 0x01
 
 typedef struct vmem vmem_t;
+typedef struct vmem_seg vmem_seg_t;
 
+#define VMEM_FREELIST_LEN (sizeof(uintptr_t) * 8)
 struct vmem {
   char vm_name[VMEM_NAMELEN]; /* arena name */
   vmem_lock_t vm_lock;        /* arena lock, defined in vmem_common.h */
-  uint32_t vm_id;             /* arena id
-                               * ( XXX: unused for now)
-                               * */
+  uint32_t vm_id;             /* arena id */
   vmem_t *vm_source;          /*arena vmem source for importing resources*/
-                              // TODO: add KSTAT;
+  size_t vm_quantumn;
   void *(*vm_source_alloc)(vmem_t *, size_t, int);
   void (*vm_source_free)(vmem_t *, void *, size_t);
+  vmem_seg_t *vm_freelist[VMEM_FREELIST_LEN + 1];
+};
+
+struct vmem_seg {
+  uintptr_t start;  /* start of the segment */
+  uintptr_t end;    /* end of the segment */
+  vmem_seg_t *next; /* next segment in the link */
+  vmem_seg_t *prev; /* previous segment */
 };
 
 vmem_t *
@@ -44,6 +52,8 @@ void vmem_xfree(vmem_t *vmp, void *addr, size_t size);
 
 void *vmem_add(vmem_t *vmp, void *addr, size_t size, int vmflag);
 
-void vmem_init(void *base, size_t size); // Base and size of the kernal heap
+void vmem_init(
+    void *base,
+    size_t size); // Virtual adress of the base and size of the kernel heap.
 
 #endif // !_VMEM_H
