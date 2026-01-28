@@ -6,26 +6,40 @@
 #define VM_SLEEP 0x10
 #define VM_NOSLEEP 0x01
 
+#define VMEM_HASHTABLE_LENGTH                                                  \
+  64                         /* number of buckets for allocated hash table */
+#define VMEM_INITIAL 15      /* number of initial vmem pools */
+#define VMEM_SEG_INITIAL 100 /* number of initial segments */
+
 typedef struct vmem vmem_t;
 typedef struct vmem_seg vmem_seg_t;
 
 #define VMEM_FREELIST_LEN (sizeof(uintptr_t) * 8)
+
 struct vmem {
   char vm_name[VMEM_NAMELEN]; /* arena name */
   vmem_lock_t vm_lock;        /* arena lock, defined in vmem_common.h */
   uint32_t vm_id;             /* arena id */
   vmem_t *vm_source;          /*arena vmem source for importing resources*/
-  size_t vm_quantumn;
+  size_t
+      vm_quantumn; /* quote from solaris8: "Most commonly the quantum is either
+                    * 1 or PAGESIZE, but any power of 2 is legal.  All vmem
+                    * allocations are guaranteed to be quantum-aligned.""*/
   void *(*vm_source_alloc)(vmem_t *, size_t, int);
   void (*vm_source_free)(vmem_t *, void *, size_t);
   vmem_seg_t *vm_freelist[VMEM_FREELIST_LEN + 1];
+  vmem_seg_t *vm_hashtable[VMEM_HASHTABLE_LENGTH]; /* initial hash table */
 };
 
 struct vmem_seg {
-  uintptr_t start;  /* start of the segment */
-  uintptr_t end;    /* end of the segment */
-  vmem_seg_t *next; /* next segment in the link */
-  vmem_seg_t *prev; /* previous segment */
+  uintptr_t start;   /* start of the segment */
+  uintptr_t end;     /* end of the segment */
+  vmem_seg_t *knext; /* next segment of the same kin/type (span, free
+                        segment, allocated segment) */
+  vmem_seg_t *kprev; /* previous segment of the same kin/type  */
+
+  vmem_seg_t *anext; /* next segment in the arena */
+  vmem_seg_t *prev;  /* previous segment in the arena */
 };
 
 vmem_t *

@@ -44,4 +44,8 @@ typedef mtx_t vmem_lock_t; /* We will use a mutex from the threads.h library */
 #define vmem_frame_map(                                                        \
     addr, frame) /* Provide a function to which addr is mapped to frame */
 
+#define vmem_panic                                                             \
+  printf /* Panic function and whatnot, optional if your code is bugfree and   \
+            perfect in every single way */
+
 #endif
