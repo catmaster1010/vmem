@@ -29,17 +29,19 @@ struct vmem {
   void (*vm_source_free)(vmem_t *, void *, size_t);
   vmem_seg_t *vm_freelist[VMEM_FREELIST_LEN + 1];
   vmem_seg_t *vm_hashtable[VMEM_HASHTABLE_LENGTH]; /* initial hash table */
+  size_t vm_nsegfree;     /* # of free vmem_seg_t structures*/
+  vmem_seg_t *vm_segfree; /* freelist of `vmem_seg_t` structures */
 };
 
 struct vmem_seg {
-  uintptr_t start;   /* start of the segment */
-  uintptr_t end;     /* end of the segment */
-  vmem_seg_t *knext; /* next segment of the same kin/type (span, free
+  uintptr_t vs_start;   /* start of the segment */
+  uintptr_t vs_end;     /* end of the segment */
+  vmem_seg_t *vs_knext; /* next segment of the same kin/type (span, free
                         segment, allocated segment) */
-  vmem_seg_t *kprev; /* previous segment of the same kin/type  */
+  vmem_seg_t *vs_kprev; /* previous segment of the same kin/type  */
 
-  vmem_seg_t *anext; /* next segment in the arena */
-  vmem_seg_t *prev;  /* previous segment in the arena */
+  vmem_seg_t *vs_anext; /* next segment in the arena */
+  vmem_seg_t *vs_prev;  /* previous segment in the arena */
 };
 
 vmem_t *

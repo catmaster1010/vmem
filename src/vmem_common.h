@@ -1,6 +1,7 @@
 #ifndef _VMEM_COMMON_H
 #define _VMEM_COMMON_H
 #include <stdio.h>
+#include <string.h>
 #include <threads.h>
 #include <unistd.h>
 
@@ -39,13 +40,15 @@ typedef mtx_t vmem_lock_t; /* We will use a mutex from the threads.h library */
       segkmem_alloc when it invokes vmem_alloc() on                            \
       heap_arena to get a virtual adress and then backs                        \
       it with physical pages, how you choose to get a physical page is up to   \
-      you, eg. first fit, best fit, worst fit   */
+      you, eg. first fit, best fit, worst fit                                  \
+      Will return an address on sucessful allocation and a NULL pointer on an  \
+      unsucessful one */
 
 #define vmem_frame_map(                                                        \
     addr, frame) /* Provide a function to which addr is mapped to frame */
-
 #define vmem_panic                                                             \
   printf /* Panic function and whatnot, optional if your code is bugfree and   \
             perfect in every single way */
 
+#define strcpy strcpy /* Just the libc's string.h strcpy */
 #endif
