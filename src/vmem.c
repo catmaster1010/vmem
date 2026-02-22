@@ -70,7 +70,11 @@ static int vmem_populate(vmem_t *vmp, size_t nsegneeded, int vmflag) {
   return 0;
 }
 
+static void *vmem_segment_create(vmem_t *vmp, void *addr, size_t size,
+                                 u_int8_t type) {}
+
 static void *vmem_span_create(vmem_t *vmp, void *addr, size_t size) {
+
   return NULL;
 }
 
@@ -163,15 +167,31 @@ void *vmem_add(vmem_t *vmp, void *addr, size_t size, int vmflag) {
   }
 }
 
+/* A bit of info on these functions: (from bonwick '01)
+ * The power of importing lies in the side effects of the
+ * import functions, and is best understood by example.
+ * In Solaris, the function segkmem_alloc() invokes
+ * vmem_alloc() to get a virtual address and then backs
+ * it with physical pages. Therefore, we can create an
+ * arena of mapped pages by simply importing from an
+ * arena of virtual addresses using segkmem_alloc()
+ * and segkmem_free().
+ * */
+static void segkmem_free(vmem_t *vmp, void *addr, size_t size) {}
+static void *segkmem_alloc(vmem_t *vmp, size_t size, int vmflag) {
+  return NULL;
+}
+
 void vmem_init(void *base, size_t size) {
   vmem_lock_init(&vmem_id_lock);
-  heap_arena = vmem_create("heap", NULL, 0, PAGE_SIZE, NULL, NULL, NULL, 0,
+  heap_arena = vmem_create("heap", NULL, 0, PAGE_SIZE, segkmem_alloc,
+                           segkmem_free, NULL, 0,
                            VM_SLEEP); // Kernel virtual address arena
 
-  vmem_seg_arena =
-      vmem_create("vmem_seg", NULL, 0, PAGE_SIZE, NULL, NULL, heap_arena, 0,
-                  VM_SLEEP); // arena of mapped pages,
+  vmem_seg_arena = vmem_create("vmem_seg", NULL, 0, PAGE_SIZE, NULL, NULL,
+                               heap_arena, 0, VM_SLEEP);
   vmem_add(heap_arena, base, size, VM_SLEEP);
-  vmem_vmem_arena = vmem_create("vmem_vmem", vmem0, sizeof(vmem0), 1, NULL,
-                                NULL, vmem_seg_arena, 0, VM_SLEEP);
+  vmem_vmem_arena =
+      vmem_create("vmem_vmem", vmem0, sizeof(vmem0), 1, segkmem_alloc,
+                  segkmem_free, vmem_seg_arena, 0, VM_SLEEP);
 }

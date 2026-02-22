@@ -11,6 +11,10 @@
 #define VMEM_INITIAL 15      /* number of initial vmem pools */
 #define VMEM_SEG_INITIAL 100 /* number of initial segments */
 
+#define VMEM_ALLOC 0x01 /* Allocated segment */
+#define VMEM_FREE 0x02  /* Free segment */
+#define VMEM_SPAN 0x03  /* Span segment */
+
 typedef struct vmem vmem_t;
 typedef struct vmem_seg vmem_seg_t;
 
@@ -31,6 +35,7 @@ struct vmem {
   vmem_seg_t *vm_hashtable[VMEM_HASHTABLE_LENGTH]; /* initial hash table */
   size_t vm_nsegfree;     /* # of free vmem_seg_t structures*/
   vmem_seg_t *vm_segfree; /* freelist of `vmem_seg_t` structures */
+  vmem_seg_t *vm_sp;      /* seg pointer to the dll of segment structures */
 };
 
 struct vmem_seg {
