@@ -1,6 +1,5 @@
 #include "vmem.h"
 #include "vmem_common.h"
-#include <sys/types.h>
 
 vmem_t *heap_arena;      /* Primordial kernel vmem arena*/
 vmem_t *vmem_seg_arena;  /* arena for `vmem_seg_t` structures*/
@@ -71,7 +70,7 @@ static int vmem_populate(vmem_t *vmp, size_t nsegneeded, int vmflag) {
 }
 
 static void *vmem_segment_create(vmem_t *vmp, void *addr, size_t size,
-                                 u_int8_t type) {}
+                                 uint8_t type) {}
 
 static void *vmem_span_create(vmem_t *vmp, void *addr, size_t size) {
 
